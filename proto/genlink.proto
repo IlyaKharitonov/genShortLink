@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = ".";
+
+service genLink {
+    rpc Create(URL)returns(ShortURL){}
+    rpc Get(ShortURL)returns(URL){}
+}
+
+message URL{
+    string URL = 1;
+}
+
+message ShortURL{
+    string ShortURL = 1;
+}
