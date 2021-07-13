@@ -8,28 +8,31 @@ import (
 )
 
 type Server struct {
-	DB *sql.DB
+	DB  *sql.DB
 	Gen Generator
 }
 
 const (
-	table  string = "links"
+	table string = "links"
 )
 
 func (s *Server) Create(ctx context.Context, longLink *api.URL) (shortLink *api.ShortURL, err error) {
-	// генерирование ссылки
-	s.Gen.GenerateShortLink()
+
+	if longLink.URL == "" {
+		return &api.ShortURL{ShortURL: ""}, nil
+	}
+
 	// выполняем запрос на поиск длинной ссылки
 	var sl string
 	s.DB.QueryRow("select shortlink from "+table+" where longlink = $1", longLink.URL).Scan(&sl)
-	if sl!= "" {
-		if sl != s.Gen.genLink{
-			fmt.Println(longLink.GetURL() + " найден " + sl)
-			return &api.ShortURL{ShortURL: sl}, nil
-		}
+	if sl != "" {
+		fmt.Println(longLink.GetURL() + " найден " + sl)
+		return &api.ShortURL{ShortURL: sl}, nil
 	}
+	// генерирование ссылки
+	s.Gen.GenerateShortLink()
 	// если соответствий не найдено добавляем в таблицу новое значение
-	_, err = s.DB.Exec("insert into " + table + " (longlink, shortlink) values ($1,$2)", longLink.GetURL() , s.Gen.genLink)
+	_, err = s.DB.Exec("insert into "+table+" (longlink, shortlink) values ($1,$2)", longLink.GetURL(), s.Gen.genLink)
 	if err != nil {
 		return nil, err
 	}
@@ -37,12 +40,12 @@ func (s *Server) Create(ctx context.Context, longLink *api.URL) (shortLink *api.
 	return &api.ShortURL{ShortURL: s.Gen.genLink}, nil
 }
 
-func (s *Server) Get(ctx context.Context, shortLink *api.ShortURL)(*api.URL, error){
+func (s *Server) Get(ctx context.Context, shortLink *api.ShortURL) (*api.URL, error) {
 	var ll string
 	s.DB.QueryRow("select longlink from "+table+" where shortlink = $1", shortLink.ShortURL).Scan(&ll)
-	if ll!= "" {
-			fmt.Println(shortLink.ShortURL + " найден " + ll)
-			return &api.URL{URL: ll}, nil
+	if ll != "" {
+		fmt.Println(shortLink.ShortURL + " найден " + ll)
+		return &api.URL{URL: ll}, nil
 	}
 	return &api.URL{URL: "empty"}, nil
 }
