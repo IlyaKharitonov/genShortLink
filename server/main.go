@@ -12,8 +12,8 @@ import (
 func main() {
 
 	const (
-		user     string = "postgres"
-		password string = "1643"
+		user     string = "user"
+		password string = "0000"
 		database string = "linkdatabase"
 		host     string = "localhost"
 		port     string = "5432"
@@ -35,17 +35,17 @@ func main() {
 
 	// создаем объект, который реализует интерфейс GenLinkServer,
 	// передаем в него обект для работы с базой
-	s := &Server{DB:db, Gen: gen}
+	s := &Server{DB: db, Gen: gen}
 	srv := grpc.NewServer()
-	api.RegisterGenLinkServer(srv,s)
+	api.RegisterGenLinkServer(srv, s)
 
-	l,err:= net.Listen("tcp",":8080" )
-	if err != nil{
+	l, err := net.Listen("tcp", ":8080")
+	if err != nil {
 		panic(err)
 	}
 
 	err = srv.Serve(l)
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
 }

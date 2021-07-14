@@ -12,8 +12,8 @@ import (
 // установить соединение с базой
 
 const (
-	user     string = "postgres"
-	password string = "1643"
+	user     string = "user"
+	password string = "0000"
 	database string = "linkdatabase"
 	host     string = "localhost"
 	port     string = "5432"
@@ -21,7 +21,7 @@ const (
 )
 
 var ShortLink string
-var LongLink = "test10.com"
+var LongLink = "test12.com"
 
 type testCase struct {
 	testlink      string // тестовая ссылка
@@ -64,7 +64,6 @@ func TestCreate(t *testing.T) {
 			isErr:         true,
 		},
 	}
-
 	for i, tc := range testCases {
 		resShortLink, err := server.Create(context.Background(), &api.URL{URL: tc.testlink})
 		if err != nil {
@@ -76,7 +75,7 @@ func TestCreate(t *testing.T) {
 		}
 
 		var resLongLink string
-		db.QueryRow("select longlink from "+table+" where shortlink = $1", resShortLink.ShortURL).Scan(&resLongLink)
+		_ = db.QueryRow("select longlink from "+table+" where shortlink = $1", resShortLink.ShortURL).Scan(&resLongLink)
 		//resLongLink, err := server.Get(context.Background(), resShortLink)
 		//if err != nil {
 		//	t.Fatal("Err Create method: ", err)
@@ -85,8 +84,8 @@ func TestCreate(t *testing.T) {
 		if tc.testlink != resLongLink && tc.isErr == false {
 			t.Error("Values not equal")
 		}
-		if tc.testshortlink != "Ссылка не сгенерирована, пустой URL" && tc.isErr == true {
-			t.Error("Expected error")
+		if tc.testshortlink != "" && tc.isErr == true {
+			t.Error("Expected empty ShortURL")
 		}
 	}
 }
