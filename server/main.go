@@ -4,21 +4,19 @@ import (
 	"database/sql"
 	"fmt"
 	"genLink/proto/api"
-	//
 	_ "github.com/go-sql-driver/mysql"
 	"google.golang.org/grpc"
 	"net"
 )
 
 func main() {
-
 	const (
 		login   string = "root"
 		pass    string = "0000"
 		mysqldb string = "127.0.0.1:3306"
 	)
-
 	connData := login + ":" + pass + "@(" + mysqldb + ")/"
+
 	db, err := sql.Open("mysql", connData)
 
 	_, err = db.Exec("create database if not exists linkdb")
