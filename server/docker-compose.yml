@@ -1,39 +1,24 @@
 version: "2.1"
 
 services:
+
   # контейнер с сервером
   server:
-
     build: .
-
     ports:
-      - "8000:8000"
-
-    command: ./MyFirstService
-
+      - "9080:8000"
+    command: ./server
     restart: always
 
     # контейнер с базой
-
-  postgres:
-    image: postgres:13.1
-
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
-      timeout: 45s
-      interval: 10s
-      retries: 10
+  mysqldb:
+    image: mysql:5.7.32
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=0000
-      - APP_DB_USER=user
-      - APP_DB_PASS=0000
-      - APP_DB_NAME=linkdatabase
-    volumes:
-      - ./db:/docker-entrypoint-initdb.d/
+      - MYSQL_ROOT_PASSWORD=0000
+      - MYSQL_DATABASE=linkdb
     ports:
-      - 5432:5432
+      - 3306:3306
 
 
 

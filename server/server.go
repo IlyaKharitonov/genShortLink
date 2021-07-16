@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"genLink/proto/api"
+	"log"
+	"os"
 )
 
 type Server struct {
@@ -13,10 +15,16 @@ type Server struct {
 }
 
 const (
-	table string = "links"
+	table string = "linkdb.links"
 )
 
 func (s *Server) Create(ctx context.Context, longLink *api.URL) (shortLink *api.ShortURL, err error) {
+
+	file, err := os.OpenFile("log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.SetOutput(file)
 
 	if longLink.URL == "" {
 		return &api.ShortURL{ShortURL: ""}, nil
@@ -24,7 +32,7 @@ func (s *Server) Create(ctx context.Context, longLink *api.URL) (shortLink *api.
 
 	// выполняем запрос на поиск длинной ссылки
 	var sl string
-	s.DB.QueryRow("select shortlink from "+table+" where longlink = $1", longLink.URL).Scan(&sl)
+	s.DB.QueryRow("select shortlink from "+table+" where longlink = ?", longLink.URL).Scan(&sl)
 	if sl != "" {
 		fmt.Println(longLink.GetURL() + " найден " + sl)
 		return &api.ShortURL{ShortURL: sl}, nil
@@ -32,8 +40,9 @@ func (s *Server) Create(ctx context.Context, longLink *api.URL) (shortLink *api.
 	// генерирование ссылки
 	s.Gen.GenerateShortLink()
 	// если соответствий не найдено добавляем в таблицу новое значение
-	_, err = s.DB.Exec("insert into "+table+" (longlink, shortlink) values ($1,$2)", longLink.GetURL(), s.Gen.genLink)
+	_, err = s.DB.Query("insert into "+table+" (longlink, shortlink) values (?,?)", longLink.GetURL(), s.Gen.genLink)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	fmt.Println(longLink.GetURL() + " сгенерирован " + s.Gen.genLink)
@@ -42,7 +51,7 @@ func (s *Server) Create(ctx context.Context, longLink *api.URL) (shortLink *api.
 
 func (s *Server) Get(ctx context.Context, shortLink *api.ShortURL) (*api.URL, error) {
 	var ll string
-	s.DB.QueryRow("select longlink from "+table+" where shortlink = $1", shortLink.ShortURL).Scan(&ll)
+	s.DB.QueryRow("select longlink from "+table+" where shortlink = ?", shortLink.ShortURL).Scan(&ll)
 	if ll != "" {
 		fmt.Println(shortLink.ShortURL + " найден " + ll)
 		return &api.URL{URL: ll}, nil

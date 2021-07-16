@@ -1,0 +1,8 @@
+2021/07/16 09:00:33 rpc error: code = Unavailable desc = connection closed
+2021/07/16 09:00:33 Error in grpcserver, method Create: rpc error: code = Unavailable desc = connection closed
+2021/07/16 09:05:27 rpc error: code = Unavailable desc = connection closed
+2021/07/16 09:05:27 Error in grpcserver, method Get: rpc error: code = Unavailable desc = connection closed
+2021/07/16 09:12:56 rpc error: code = Unavailable desc = connection closed
+2021/07/16 09:12:56 Error in grpcserver, method Create: rpc error: code = Unavailable desc = connection closed
+2021/07/16 10:40:49 rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 127.0.0.1:9080: connect: connection refused"
+2021/07/16 10:40:49 Error in grpcserver, method Get: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 127.0.0.1:9080: connect: connection refused"

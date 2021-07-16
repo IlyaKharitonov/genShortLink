@@ -4,7 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"genLink/proto/api"
-	_ "github.com/lib/pq"
+	//
+	_ "github.com/go-sql-driver/mysql"
 	"google.golang.org/grpc"
 	"net"
 )
@@ -12,23 +13,28 @@ import (
 func main() {
 
 	const (
-		user     string = "user"
-		password string = "0000"
-		database string = "linkdatabase"
-		host     string = "localhost"
-		port     string = "5432"
-		sslmode  string = "disable"
+		login   string = "root"
+		pass    string = "0000"
+		mysqldb string = "127.0.0.1:3306"
 	)
 
-	connData := fmt.Sprintf(
-		"user=%s password=%s dbname=%s host=%s port=%s sslmode=%s",
-		user, password, database, host, port, sslmode)
-	db, err := sql.Open("postgres", connData)
+	connData := login + ":" + pass + "@(" + mysqldb + ")/"
+	db, err := sql.Open("mysql", connData)
+
+	_, err = db.Exec("create database if not exists linkdb")
 	if err != nil {
-		fmt.Println(err)
-		//log.Fatal(err)
+		panic(err)
 	}
 
+	_, err = db.Exec("use linkdb")
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = db.Exec("create table if not exists links( id int auto_increment primary key, longlink  varchar(250) not null, shortlink varchar(30)  not null)")
+	if err != nil {
+		panic(err)
+	}
 	//создаем генератор с нужной конфигурацией
 	var gen Generator
 	gen.SetIsLong(10).SetAsciiSlice(LatinaBig, LatinaBig, Numbers)
@@ -39,7 +45,8 @@ func main() {
 	srv := grpc.NewServer()
 	api.RegisterGenLinkServer(srv, s)
 
-	l, err := net.Listen("tcp", ":8080")
+	fmt.Println("Подключился к бд, запустил grpc server")
+	l, err := net.Listen("tcp", "127.0.0.1:9080")
 	if err != nil {
 		panic(err)
 	}
